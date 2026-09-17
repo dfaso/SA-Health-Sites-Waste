@@ -22,16 +22,33 @@ map.on("load", async () => {
     data: "./data/LHN.geojson"
   });
 
-  map.addLayer({
-    id: "lhn-fill",
-    type: "fill",
-    source: "lhn-boundaries",
+map.addLayer({
+  id: "lhn-fill",
+  type: "fill",
+  source: "lhn-boundaries",
 
-    paint: {
-      "fill-color": "#3388ff",
-      "fill-opacity": 0.12
-    }
-  });
+  paint: {
+    "fill-color": [
+      "match",
+      ["get", "lhn_code"],
+
+      "CALHN",  "#2E86AB",
+      "SALHN",  "#F18F01",
+      "NALHN",  "#D1495B",
+      "BHFLHN", "#6A4C93",
+      "LCLHN",  "#00A896",
+      "RMCLHN", "#F4D35E",
+      "EFNLHN", "#577590",
+      "YNLHN",  "#43AA8B",
+      "FUNLHN", "#F3722C",
+      "WCHN",   "#9B5DE5",
+
+      "#999999"
+    ],
+
+    "fill-opacity": 0.25
+  }
+});
 
   map.addLayer({
     id: "lhn-outline",
