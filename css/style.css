@@ -1,1 +1,18 @@
 /* Main stylesheet */
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#map {
+  width: 75vw;
+  height: 75vh;
+}
