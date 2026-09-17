@@ -10,7 +10,8 @@ map.addControl(
   "top-left"
 );
 
-map.on("load", () => {
+
+map.on("load", async () => {
 
   // ============================================================
   // LHN BOUNDARIES
@@ -21,7 +22,6 @@ map.on("load", () => {
     data: "./data/LHN.geojson"
   });
 
-  // Transparent polygon fill
   map.addLayer({
     id: "lhn-fill",
     type: "fill",
@@ -33,7 +33,6 @@ map.on("load", () => {
     }
   });
 
-  // Boundary outline
   map.addLayer({
     id: "lhn-outline",
     type: "line",
@@ -47,12 +46,21 @@ map.on("load", () => {
 
 
   // ============================================================
-  // WASTE SITES
+  // LOAD WASTE SITE DATA
+  // ============================================================
+
+  const response = await fetch("./data/waste_sites.geojson");
+
+  const siteData = await response.json();
+
+
+  // ============================================================
+  // WASTE SITE MAP POINTS
   // ============================================================
 
   map.addSource("waste-sites", {
     type: "geojson",
-    data: "./data/waste_sites.geojson"
+    data: siteData
   });
 
   map.addLayer({
@@ -68,4 +76,77 @@ map.on("load", () => {
     }
   });
 
+
+  // ============================================================
+  // BUILD SITE TABLE
+  // ============================================================
+
+  buildSitesTable(siteData);
+
 });
+
+
+function buildSitesTable(siteData) {
+
+  const table = document.getElementById("sites-table");
+
+  if (!siteData.features.length) {
+    return;
+  }
+
+  // Get the property names from the GeoJSON
+  const columns = Object.keys(
+    siteData.features[0].properties
+  );
+
+
+  // ============================================================
+  // TABLE HEADER
+  // ============================================================
+
+  const thead = document.createElement("thead");
+  const headerRow = document.createElement("tr");
+
+  columns.forEach(column => {
+
+    const th = document.createElement("th");
+
+    th.textContent = column;
+
+    headerRow.appendChild(th);
+
+  });
+
+  thead.appendChild(headerRow);
+
+  table.appendChild(thead);
+
+
+  // ============================================================
+  // TABLE BODY
+  // ============================================================
+
+  const tbody = document.createElement("tbody");
+
+  siteData.features.forEach(feature => {
+
+    const row = document.createElement("tr");
+
+    columns.forEach(column => {
+
+      const td = document.createElement("td");
+
+      td.textContent =
+        feature.properties[column] ?? "";
+
+      row.appendChild(td);
+
+    });
+
+    tbody.appendChild(row);
+
+  });
+
+  table.appendChild(tbody);
+
+}
