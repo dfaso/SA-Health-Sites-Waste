@@ -1,4 +1,3 @@
-/* Main stylesheet */
 html,
 body {
   margin: 0;
@@ -15,4 +14,8 @@ body {
 #map {
   width: 75vw;
   height: 75vh;
+
+  /* Temporary test */
+  background: lightgrey;
+  border: 2px solid black;
 }
