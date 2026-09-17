@@ -1,32 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>SA Health Sites - Waste Map</title>
+  <title>SA Health Sites - Waste</title>
 
-  <link href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css" rel="stylesheet">
+  <!-- Bootstrap -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
 
+  <!-- MapLibre -->
+  <link
+    href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css"
+    rel="stylesheet"
+  >
+
+  <!-- Custom CSS -->
   <link rel="stylesheet" href="./css/style.css">
 </head>
 
 <body>
 
-  <header id="page-header">
-  <h1>SA Health Sites - Waste</h1>
-</header>
-  
-  <div id="map"></div>
+  <!-- Sticky Header -->
+  <nav class="navbar navbar-dark bg-dark sticky-top shadow-sm">
+    <div class="container-fluid px-4">
+      <span class="navbar-brand mb-0 h1">
+        SA Health Sites - Waste
+      </span>
+    </div>
+  </nav>
 
-  <div id="table-container">
-    <table id="sites-table"></table>
-  </div>
+  <!-- Main Page Content -->
+  <main class="container-fluid py-4">
 
+    <div id="map"></div>
+
+    <div id="table-container" class="mt-4">
+      <table
+        id="sites-table"
+        class="table table-striped table-hover table-bordered">
+      </table>
+    </div>
+
+  </main>
+
+  <!-- Bootstrap JavaScript -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js">
+  </script>
+
+  <!-- MapLibre -->
   <script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
+
+  <!-- Your JavaScript -->
   <script src="./js/map.js"></script>
 
 </body>
-
 </html>
