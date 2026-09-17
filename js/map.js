@@ -2,7 +2,7 @@ const map = new maplibregl.Map({
   container: "map",
   style: "https://tiles.openfreemap.org/styles/liberty",
   center: [138.6, -34.9],
-  zoom: 6
+  zoom: 4
 });
 
 map.addControl(
@@ -86,8 +86,8 @@ map.addLayer({
     source: "waste-sites",
 
     paint: {
-      "circle-radius": 5,
-      "circle-color": "#3388ff",
+      "circle-radius": 6,
+      "circle-color": "#FF4A4A",
       "circle-stroke-color": "#ffffff",
       "circle-stroke-width": 1
     }
