@@ -56,7 +56,7 @@ map.addLayer({
     source: "lhn-boundaries",
 
     paint: {
-      "line-color": "#3388ff",
+      "line-color": "#000000",
       "line-width": 2
     }
   });
