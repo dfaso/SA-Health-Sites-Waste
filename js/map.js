@@ -1,9 +1,11 @@
 const map = new maplibregl.Map({
   container: "map",
   style: "https://tiles.openfreemap.org/styles/liberty",
-  center: [138.6, -34.9],
+  center: [135.5, -31.5],
   zoom: 5
 });
+
+-31.519179230054693, 135.55638863046636
 
 map.addControl(
   new maplibregl.NavigationControl(),
