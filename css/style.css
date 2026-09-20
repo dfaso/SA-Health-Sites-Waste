@@ -53,3 +53,17 @@ body {
   background-color: white;
   font-size: 14px;
 }
+
+/* ============================================================
+   TABLE INTERACTION
+   ============================================================ */
+
+#sites-table th {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+#sites-table tbody tr {
+  cursor: pointer;
+}
