@@ -1,4 +1,12 @@
 // ============================================================
+// INITIAL MAP POSITION
+// ============================================================
+
+const INITIAL_CENTER = [135.5, -31.5];
+const INITIAL_ZOOM = 5;
+
+
+// ============================================================
 // GLOBAL DATA / STATE
 // ============================================================
 
@@ -16,8 +24,8 @@ let currentSortDirection = "asc";
 const map = new maplibregl.Map({
   container: "map",
   style: "https://tiles.openfreemap.org/styles/liberty",
-  center: [135.5, -31.5],
-  zoom: 5
+  center: INITIAL_CENTER,
+  zoom: INITIAL_ZOOM
 });
 
 
@@ -53,6 +61,7 @@ map.on("load", async () => {
     source: "lhn-boundaries",
 
     paint: {
+
       "fill-color": [
         "match",
         ["get", "lhn_code"],
@@ -316,9 +325,20 @@ map.on("load", async () => {
       }
 
 
+      const clickedFeature =
+        event.features[0];
+
+
       const siteId =
-        event.features[0]
+        clickedFeature
           .properties["Site ID"];
+
+
+      const coordinates =
+        clickedFeature
+          .geometry
+          .coordinates
+          .slice();
 
 
       const filteredFeatures =
@@ -339,7 +359,10 @@ map.on("load", async () => {
       };
 
 
-      // Show selected site only
+      // ========================================================
+      // SHOW SELECTED SITE ONLY
+      // ========================================================
+
       map
         .getSource("waste-sites")
         .setData(
@@ -347,13 +370,30 @@ map.on("load", async () => {
         );
 
 
-      // Update table
+      // ========================================================
+      // ZOOM TO SELECTED SITE
+      // ========================================================
+
+      map.flyTo({
+        center: coordinates,
+        zoom: 15,
+        essential: true
+      });
+
+
+      // ========================================================
+      // UPDATE TABLE
+      // ========================================================
+
       buildSitesTable(
         currentFilteredData
       );
 
 
-      // Update site count
+      // ========================================================
+      // UPDATE SITE COUNT
+      // ========================================================
+
       updateSiteCount();
 
     }
@@ -372,8 +412,8 @@ map.on("load", async () => {
       /*
         Check whether a site marker was clicked.
 
-        This prevents the LHN click event from also
-        triggering when clicking a site marker.
+        Prevents LHN filtering from also firing when
+        clicking a red marker.
       */
 
       const siteFeatures =
@@ -403,9 +443,9 @@ map.on("load", async () => {
 
 
       /*
-        Update the Geographical LHN dropdown.
+        Set geographical LHN dropdown.
 
-        applyFilters() then handles:
+        applyFilters() then updates:
         - markers
         - table
         - site count
@@ -469,7 +509,7 @@ map.on("load", async () => {
 
   updateSiteCount();
 
-}); // END map load
+});
 
 
 
@@ -783,7 +823,10 @@ function updateLhnHighlight(
 
 function resetMap() {
 
-  // Clear Governing LHN
+  // ============================================================
+  // CLEAR GOVERNING LHN
+  // ============================================================
+
   document
     .getElementById(
       "governing-lhn-filter"
@@ -792,7 +835,10 @@ function resetMap() {
       "";
 
 
-  // Clear Geographical LHN
+  // ============================================================
+  // CLEAR GEOGRAPHICAL LHN
+  // ============================================================
+
   document
     .getElementById(
       "geographical-lhn-filter"
@@ -801,7 +847,10 @@ function resetMap() {
       "";
 
 
-  // Clear search
+  // ============================================================
+  // CLEAR SEARCH
+  // ============================================================
+
   document
     .getElementById(
       "site-search"
@@ -810,12 +859,18 @@ function resetMap() {
       "";
 
 
-  // Restore full dataset
+  // ============================================================
+  // RESTORE FULL DATASET
+  // ============================================================
+
   currentFilteredData =
     allSiteData;
 
 
-  // Restore all markers
+  // ============================================================
+  // RESTORE ALL MARKERS
+  // ============================================================
+
   map
     .getSource("waste-sites")
     .setData(
@@ -823,18 +878,38 @@ function resetMap() {
     );
 
 
-  // Restore all LHN colours
+  // ============================================================
+  // RESTORE LHN APPEARANCE
+  // ============================================================
+
   updateLhnHighlight("");
 
 
-  // Restore full table
+  // ============================================================
+  // RESTORE FULL TABLE
+  // ============================================================
+
   buildSitesTable(
     allSiteData
   );
 
 
-  // Restore total count
+  // ============================================================
+  // RESTORE SITE COUNT
+  // ============================================================
+
   updateSiteCount();
+
+
+  // ============================================================
+  // RESET MAP CAMERA
+  // ============================================================
+
+  map.flyTo({
+    center: INITIAL_CENTER,
+    zoom: INITIAL_ZOOM,
+    essential: true
+  });
 
 }
 
@@ -880,14 +955,6 @@ function exportCurrentSites() {
   // ============================================================
   // GET ALL PROPERTY NAMES
   // ============================================================
-
-  /*
-    This checks every currently filtered feature.
-
-    That means if a new property exists on Site 200
-    but not Site 1, it will still be included in
-    the exported CSV.
-  */
 
   const columns = [
     ...new Set(
@@ -958,7 +1025,7 @@ function exportCurrentSites() {
 
 
   // ============================================================
-  // CREATE DOWNLOAD
+  // CREATE CSV FILE
   // ============================================================
 
   const blob =
@@ -1098,7 +1165,6 @@ function buildSitesTable(
     );
 
 
-  // Clear existing table
   table.innerHTML =
     "";
 
@@ -1156,11 +1222,6 @@ function buildSitesTable(
   // ============================================================
   // GET ALL COLUMN NAMES
   // ============================================================
-
-  /*
-    Get all property names across every feature,
-    rather than only using the first site.
-  */
 
   const columns = [
     ...new Set(
@@ -1249,7 +1310,7 @@ function buildSitesTable(
 
 
       // ========================================================
-      // SHOW CURRENT SORT DIRECTION
+      // SHOW SORT DIRECTION
       // ========================================================
 
       if (
@@ -1285,7 +1346,9 @@ function buildSitesTable(
                 ? "desc"
                 : "asc";
 
-          } else {
+          }
+
+          else {
 
             currentSortColumn =
               column;
@@ -1363,14 +1426,9 @@ function buildSitesTable(
 
 
           map.flyTo({
-            center:
-              coordinates,
-
-            zoom:
-              15,
-
-            essential:
-              true
+            center: coordinates,
+            zoom: 15,
+            essential: true
           });
 
         }
