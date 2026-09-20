@@ -8345,7 +8345,7 @@
       "properties": {
         "Site ID": 382,
         "Governing LHN": "WCHN",
-        "Geographical LHN": "CALHN",
+        "Geographical LHN": "WCHN",
         "Site Name": "CAMHS Connect - WCHN",
         "Address": "55 King William Road ",
         "Suburb": "NORTH ADELAIDE ",
@@ -8367,12 +8367,12 @@
       "properties": {
         "Site ID": 383,
         "Governing LHN": "WCHN",
-        "Geographical LHN": "CALHN",
-        "Site Name": "SA Pharmacy - Women's and Children's Hospital (WCH)",
+        "Geographical LHN": "WCHN",
+        "Site Name": "SA Pharmacy - Women's and Children's Hospital (WCHN)",
         "Address": "78 King William Road",
         "Suburb": "NORTH ADELAIDE",
         "Notes": null,
-        "Search Address": "SA Pharmacy - Women's and Children's Hospital (WCH), 78 King William Road, NORTH ADELAIDE",
+        "Search Address": "SA Pharmacy - Women's and Children's Hospital (WCHN), 78 King William Road, NORTH ADELAIDE",
         "Latitude": -34.9120226093349,
         "Longitude": 138.600242838635
       },
@@ -8389,7 +8389,7 @@
       "properties": {
         "Site ID": 386,
         "Governing LHN": "WCHN",
-        "Geographical LHN": "CALHN",
+        "Geographical LHN": "WCHN",
         "Site Name": "WCHN Genetics Department",
         "Address": "Level 2, 55 King William Road",
         "Suburb": "NORTH ADELAIDE ",
@@ -8411,7 +8411,7 @@
       "properties": {
         "Site ID": 384,
         "Governing LHN": "WCHN",
-        "Geographical LHN": "CALHN",
+        "Geographical LHN": "WCHN",
         "Site Name": "WCHN Media and Comms Department",
         "Address": "Level 2, 55 King William Road",
         "Suburb": "NORTH ADELAIDE ",
@@ -8433,7 +8433,7 @@
       "properties": {
         "Site ID": 385,
         "Governing LHN": "WCHN",
-        "Geographical LHN": "CALHN",
+        "Geographical LHN": "WCHN",
         "Site Name": "WCHN Research Ethics and Governance",
         "Address": "Level 2, 55 King William Road",
         "Suburb": "NORTH ADELAIDE ",
@@ -8455,7 +8455,7 @@
       "properties": {
         "Site ID": 387,
         "Governing LHN": "WCHN",
-        "Geographical LHN": "CALHN",
+        "Geographical LHN": "WCHN",
         "Site Name": "WCHN Safety and Quality Unit",
         "Address": "Level 2, 77 King William Road",
         "Suburb": "NORTH ADELAIDE ",
@@ -8477,7 +8477,7 @@
       "properties": {
         "Site ID": 389,
         "Governing LHN": "WCHN",
-        "Geographical LHN": "CALHN",
+        "Geographical LHN": "WCHN",
         "Site Name": "WCHN Child Protection Services",
         "Address": "Level 3, 77 King William Road",
         "Suburb": "NORTH ADELAIDE ",
@@ -8499,7 +8499,7 @@
       "properties": {
         "Site ID": 390,
         "Governing LHN": "WCHN",
-        "Geographical LHN": "CALHN",
+        "Geographical LHN": "WCHN",
         "Site Name": "Women’s and Children’s Hospital",
         "Address": "72 King William Road",
         "Suburb": "NORTH ADELAIDE",
@@ -8521,7 +8521,7 @@
       "properties": {
         "Site ID": 391,
         "Governing LHN": "WCHN",
-        "Geographical LHN": "CALHN",
+        "Geographical LHN": "WCHN",
         "Site Name": "Yarrow Place and Womer’s Safety",
         "Address": "64 Pennington Terrace ",
         "Suburb": "NORTH ADELAIDE",
@@ -9005,7 +9005,7 @@
       "properties": {
         "Site ID": 413,
         "Governing LHN": "WCHN",
-        "Geographical LHN": "CALHN",
+        "Geographical LHN": "WCHN",
         "Site Name": "CAMHS Connect - WCHN",
         "Address": "55 King William Road ",
         "Suburb": "NORTH ADELAIDE ",
@@ -9027,7 +9027,7 @@
       "properties": {
         "Site ID": 414,
         "Governing LHN": "WCHN",
-        "Geographical LHN": "CALHN",
+        "Geographical LHN": "WCHN",
         "Site Name": "WCHN Media and Comms Department",
         "Address": "Level 2, 55 King William Road",
         "Suburb": "NORTH ADELAIDE ",
@@ -9049,7 +9049,7 @@
       "properties": {
         "Site ID": 415,
         "Governing LHN": "WCHN",
-        "Geographical LHN": "CALHN",
+        "Geographical LHN": "WCHN",
         "Site Name": "WCHN Research Ethics & Governance",
         "Address": "Level 2, 55 King William Road",
         "Suburb": "NORTH ADELAIDE ",
@@ -9071,7 +9071,7 @@
       "properties": {
         "Site ID": 416,
         "Governing LHN": "WCHN",
-        "Geographical LHN": "CALHN",
+        "Geographical LHN": "WCHN",
         "Site Name": "WCHN Genetics Department",
         "Address": "Level 2, 55 King William Road",
         "Suburb": "NORTH ADELAIDE ",
@@ -9093,7 +9093,7 @@
       "properties": {
         "Site ID": 417,
         "Governing LHN": "WCHN",
-        "Geographical LHN": "CALHN",
+        "Geographical LHN": "WCHN",
         "Site Name": "WCH Safety and Quality Unit",
         "Address": "Level 2, 77 King William Road",
         "Suburb": "NORTH ADELAIDE ",
@@ -9115,7 +9115,7 @@
       "properties": {
         "Site ID": 418,
         "Governing LHN": "WCHN",
-        "Geographical LHN": "CALHN",
+        "Geographical LHN": "WCHN",
         "Site Name": "WCHN Child Protection Services",
         "Address": "Level 3, 77 King William Road",
         "Suburb": "NORTH ADELAIDE ",
