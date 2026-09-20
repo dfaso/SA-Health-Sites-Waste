@@ -1,5 +1,7 @@
 let allSiteData = null;
 let currentFilteredData = null;
+let currentSortColumn = null;
+let currentSortDirection = "asc";
 
 
 const map = new maplibregl.Map({
@@ -914,76 +916,91 @@ function escapeHtml(
 // BUILD SITE TABLE
 // ============================================================
 
-function buildSitesTable(
-  siteData
-) {
+function buildSitesTable(siteData) {
 
   const table =
-    document.getElementById(
-      "sites-table"
-    );
+    document.getElementById("sites-table");
 
 
-  table.innerHTML =
-    "";
+  table.innerHTML = "";
 
 
   // ============================================================
   // NO RESULTS
   // ============================================================
 
-  if (
-    !siteData.features.length
-  ) {
+  if (!siteData.features.length) {
 
     const tbody =
-      document.createElement(
-        "tbody"
-      );
-
+      document.createElement("tbody");
 
     const row =
-      document.createElement(
-        "tr"
-      );
-
+      document.createElement("tr");
 
     const td =
-      document.createElement(
-        "td"
-      );
+      document.createElement("td");
 
 
     td.textContent =
       "No sites found.";
 
 
-    row.appendChild(
-      td
-    );
+    row.appendChild(td);
 
+    tbody.appendChild(row);
 
-    tbody.appendChild(
-      row
-    );
-
-
-    table.appendChild(
-      tbody
-    );
+    table.appendChild(tbody);
 
 
     return;
-
   }
 
 
-  const columns =
-    Object.keys(
-      siteData
-        .features[0]
-        .properties
-    );
+  // ============================================================
+  // GET ALL COLUMN NAMES
+  // ============================================================
+
+  const columns = [
+    ...new Set(
+      siteData.features.flatMap(feature =>
+        Object.keys(feature.properties)
+      )
+    )
+  ];
+
+
+  // ============================================================
+  // COPY FEATURES BEFORE SORTING
+  // ============================================================
+
+  const features =
+    [...siteData.features];
+
+
+  // ============================================================
+  // SORT DATA
+  // ============================================================
+
+  if (currentSortColumn) {
+
+    features.sort((a, b) => {
+
+      const valueA =
+        a.properties[currentSortColumn] ?? "";
+
+      const valueB =
+        b.properties[currentSortColumn] ?? "";
+
+
+      return compareValues(
+        valueA,
+        valueB,
+        currentSortDirection
+      );
+
+    });
+
+  }
 
 
   // ============================================================
@@ -991,27 +1008,67 @@ function buildSitesTable(
   // ============================================================
 
   const thead =
-    document.createElement(
-      "thead"
-    );
+    document.createElement("thead");
 
 
   const headerRow =
-    document.createElement(
-      "tr"
-    );
+    document.createElement("tr");
 
 
   columns.forEach(column => {
 
     const th =
-      document.createElement(
-        "th"
-      );
+      document.createElement("th");
 
 
     th.textContent =
       column;
+
+
+    // Show sort direction
+    if (
+      currentSortColumn === column
+    ) {
+
+      th.textContent +=
+        currentSortDirection === "asc"
+          ? " ▲"
+          : " ▼";
+
+    }
+
+
+    // Sort when heading is clicked
+    th.addEventListener(
+      "click",
+      () => {
+
+        if (
+          currentSortColumn === column
+        ) {
+
+          currentSortDirection =
+            currentSortDirection === "asc"
+              ? "desc"
+              : "asc";
+
+        } else {
+
+          currentSortColumn =
+            column;
+
+          currentSortDirection =
+            "asc";
+
+        }
+
+
+        buildSitesTable(
+          siteData
+        );
+
+      }
+    );
 
 
     headerRow.appendChild(
@@ -1036,53 +1093,134 @@ function buildSitesTable(
   // ============================================================
 
   const tbody =
-    document.createElement(
-      "tbody"
+    document.createElement("tbody");
+
+
+  features.forEach(feature => {
+
+    const row =
+      document.createElement("tr");
+
+
+    // ============================================================
+    // CLICK TABLE ROW -> ZOOM TO SITE
+    // ============================================================
+
+    row.addEventListener(
+      "click",
+      () => {
+
+        if (
+          !feature.geometry ||
+          !feature.geometry.coordinates
+        ) {
+          return;
+        }
+
+
+        const coordinates =
+          feature.geometry.coordinates;
+
+
+        map.flyTo({
+          center: coordinates,
+          zoom: 15,
+          essential: true
+        });
+
+      }
     );
 
 
-  siteData.features.forEach(
-    feature => {
+    // ============================================================
+    // CREATE CELLS
+    // ============================================================
 
-      const row =
-        document.createElement(
-          "tr"
-        );
+    columns.forEach(column => {
 
-
-      columns.forEach(
-        column => {
-
-          const td =
-            document.createElement(
-              "td"
-            );
+      const td =
+        document.createElement("td");
 
 
-          td.textContent =
-            feature
-              .properties[column] ??
-            "";
+      td.textContent =
+        feature.properties[column] ?? "";
 
 
-          row.appendChild(
-            td
-          );
-
-        }
+      row.appendChild(
+        td
       );
 
+    });
 
-      tbody.appendChild(
-        row
-      );
 
-    }
-  );
+    tbody.appendChild(
+      row
+    );
+
+  });
 
 
   table.appendChild(
     tbody
   );
+
+}
+
+
+
+// ============================================================
+// SORT VALUE COMPARISON
+// ============================================================
+
+function compareValues(
+  valueA,
+  valueB,
+  direction
+) {
+
+  let comparison = 0;
+
+
+  const numberA =
+    Number(valueA);
+
+  const numberB =
+    Number(valueB);
+
+
+  const bothNumbers =
+    valueA !== "" &&
+    valueB !== "" &&
+    Number.isFinite(numberA) &&
+    Number.isFinite(numberB);
+
+
+  // Numeric sorting
+  if (bothNumbers) {
+
+    comparison =
+      numberA - numberB;
+
+  }
+
+  // Text sorting
+  else {
+
+    comparison =
+      String(valueA).localeCompare(
+        String(valueB),
+        undefined,
+        {
+          numeric: true,
+          sensitivity: "base"
+        }
+      );
+
+  }
+
+
+  return direction === "asc"
+    ? comparison
+    : -comparison;
 
 }
