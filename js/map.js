@@ -232,58 +232,100 @@ map.on("load", async () => {
 
 
   // ============================================================
-  // CLICK LHN
+// CLICK LHN
+// ============================================================
+
+map.on("click", "lhn-fill", (event) => {
+
+  // Don't trigger the LHN click if a site or cluster was clicked
+  const siteFeatures = map.queryRenderedFeatures(
+    event.point,
+    {
+      layers: [
+        "waste-sites",
+        "clusters",
+        "cluster-count"
+      ]
+    }
+  );
+
+  if (siteFeatures.length) {
+    return;
+  }
+
+
+  if (!event.features.length) {
+    return;
+  }
+
+
+  // Get selected LHN code
+  const clickedLhn =
+    event.features[0].properties.lhn_code;
+
+
+  // ============================================================
+  // FILTER SITES TO SELECTED LHN
   // ============================================================
 
-  map.on("click", "lhn-fill", (event) => {
+  const filteredFeatures =
+    siteData.features.filter(feature => {
 
-    /*
-      A site marker or cluster may also be sitting over the LHN polygon.
+      return feature.properties["Geographical LHN"] ===
+             clickedLhn;
 
-      If one was clicked, let the site/cluster event handle the click
-      instead of also filtering by LHN.
-    */
-
-    const siteFeatures = map.queryRenderedFeatures(
-      event.point,
-      {
-        layers: [
-          "waste-sites",
-          "clusters",
-          "cluster-count"
-        ]
-      }
-    );
-
-    if (siteFeatures.length) {
-      return;
-    }
-
-
-    if (!event.features.length) {
-      return;
-    }
-
-
-    const clickedLhn =
-      event.features[0].properties.lhn_code;
-
-
-    const filteredFeatures =
-      siteData.features.filter(feature => {
-
-        return feature.properties["Geographical LHN"] ===
-               clickedLhn;
-
-      });
-
-
-    buildSitesTable({
-      type: "FeatureCollection",
-      features: filteredFeatures
     });
 
-  }); // END LHN click
+
+  const filteredSiteData = {
+    type: "FeatureCollection",
+    features: filteredFeatures
+  };
+
+
+  // Update map markers / clusters
+  map
+    .getSource("waste-sites")
+    .setData(filteredSiteData);
+
+
+  // Update table
+  buildSitesTable(filteredSiteData);
+
+
+  // ============================================================
+  // FADE NON-SELECTED LHNs
+  // ============================================================
+
+  map.setPaintProperty(
+    "lhn-fill",
+    "fill-opacity",
+    [
+      "case",
+
+      ["==", ["get", "lhn_code"], clickedLhn],
+      0.35,
+
+      0.05
+    ]
+  );
+
+
+  // Fade non-selected outlines as well
+  map.setPaintProperty(
+    "lhn-outline",
+    "line-opacity",
+    [
+      "case",
+
+      ["==", ["get", "lhn_code"], clickedLhn],
+      1,
+
+      0.15
+    ]
+  );
+
+}); // END LHN click
 
 
   // ============================================================
