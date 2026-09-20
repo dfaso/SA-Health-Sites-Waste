@@ -1,8 +1,17 @@
+// ============================================================
+// GLOBAL DATA / STATE
+// ============================================================
+
 let allSiteData = null;
 let currentFilteredData = null;
+
 let currentSortColumn = null;
 let currentSortDirection = "asc";
 
+
+// ============================================================
+// MAP SETUP
+// ============================================================
 
 const map = new maplibregl.Map({
   container: "map",
@@ -44,7 +53,6 @@ map.on("load", async () => {
     source: "lhn-boundaries",
 
     paint: {
-
       "fill-color": [
         "match",
         ["get", "lhn_code"],
@@ -91,8 +99,10 @@ map.on("load", async () => {
   const response =
     await fetch("./data/waste_sites.geojson");
 
+
   allSiteData =
     await response.json();
+
 
   currentFilteredData =
     allSiteData;
@@ -135,6 +145,7 @@ map.on("load", async () => {
     "Governing LHN"
   );
 
+
   populateDropdown(
     "geographical-lhn-filter",
     "Geographical LHN"
@@ -147,17 +158,26 @@ map.on("load", async () => {
 
   document
     .getElementById("governing-lhn-filter")
-    .addEventListener("change", applyFilters);
+    .addEventListener(
+      "change",
+      applyFilters
+    );
 
 
   document
     .getElementById("geographical-lhn-filter")
-    .addEventListener("change", applyFilters);
+    .addEventListener(
+      "change",
+      applyFilters
+    );
 
 
   document
     .getElementById("site-search")
-    .addEventListener("input", applyFilters);
+    .addEventListener(
+      "input",
+      applyFilters
+    );
 
 
   // ============================================================
@@ -166,7 +186,10 @@ map.on("load", async () => {
 
   document
     .getElementById("reset-button")
-    .addEventListener("click", resetMap);
+    .addEventListener(
+      "click",
+      resetMap
+    );
 
 
   // ============================================================
@@ -175,7 +198,10 @@ map.on("load", async () => {
 
   document
     .getElementById("export-button")
-    .addEventListener("click", exportCurrentSites);
+    .addEventListener(
+      "click",
+      exportCurrentSites
+    );
 
 
   // ============================================================
@@ -190,190 +216,242 @@ map.on("load", async () => {
     });
 
 
-  map.on("mouseenter", "waste-sites", event => {
+  map.on(
+    "mouseenter",
+    "waste-sites",
+    event => {
 
-    map.getCanvas().style.cursor =
-      "pointer";
+      map.getCanvas().style.cursor =
+        "pointer";
 
 
-    if (!event.features.length) {
-      return;
+      if (!event.features.length) {
+        return;
+      }
+
+
+      const feature =
+        event.features[0];
+
+
+      const properties =
+        feature.properties;
+
+
+      const coordinates =
+        feature.geometry.coordinates.slice();
+
+
+      const popupHtml = `
+        <div style="min-width: 220px">
+
+          <div style="
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 6px;
+          ">
+            ${escapeHtml(properties["Site Name"])}
+          </div>
+
+          <div style="font-size: 12px;">
+            ${escapeHtml(properties["Address"])}
+          </div>
+
+          <div style="
+            font-size: 12px;
+            margin-bottom: 6px;
+          ">
+            ${escapeHtml(properties["Suburb"])}
+          </div>
+
+          <div style="font-size: 11px;">
+            <strong>Governing LHN:</strong>
+            ${escapeHtml(properties["Governing LHN"])}
+          </div>
+
+          <div style="font-size: 11px;">
+            <strong>Geographical LHN:</strong>
+            ${escapeHtml(properties["Geographical LHN"])}
+          </div>
+
+        </div>
+      `;
+
+
+      hoverPopup
+        .setLngLat(coordinates)
+        .setHTML(popupHtml)
+        .addTo(map);
+
     }
+  );
 
 
-    const feature =
-      event.features[0];
+  map.on(
+    "mouseleave",
+    "waste-sites",
+    () => {
+
+      map.getCanvas().style.cursor =
+        "";
 
 
-    const properties =
-      feature.properties;
+      hoverPopup.remove();
 
-
-    const coordinates =
-      feature.geometry.coordinates.slice();
-
-
-    const popupHtml = `
-      <div style="min-width: 220px">
-
-        <div style="
-          font-size: 14px;
-          font-weight: 700;
-          margin-bottom: 6px;
-        ">
-          ${escapeHtml(properties["Site Name"])}
-        </div>
-
-        <div style="font-size: 12px;">
-          ${escapeHtml(properties["Address"])}
-        </div>
-
-        <div style="
-          font-size: 12px;
-          margin-bottom: 6px;
-        ">
-          ${escapeHtml(properties["Suburb"])}
-        </div>
-
-        <div style="font-size: 11px;">
-          <strong>Governing LHN:</strong>
-          ${escapeHtml(properties["Governing LHN"])}
-        </div>
-
-        <div style="font-size: 11px;">
-          <strong>Geographical LHN:</strong>
-          ${escapeHtml(properties["Geographical LHN"])}
-        </div>
-
-      </div>
-    `;
-
-
-    hoverPopup
-      .setLngLat(coordinates)
-      .setHTML(popupHtml)
-      .addTo(map);
-
-  });
-
-
-  map.on("mouseleave", "waste-sites", () => {
-
-    map.getCanvas().style.cursor =
-      "";
-
-    hoverPopup.remove();
-
-  });
+    }
+  );
 
 
   // ============================================================
   // CLICK SITE
   // ============================================================
 
-  map.on("click", "waste-sites", event => {
+  map.on(
+    "click",
+    "waste-sites",
+    event => {
 
-    if (!event.features.length) {
-      return;
+      if (!event.features.length) {
+        return;
+      }
+
+
+      const siteId =
+        event.features[0]
+          .properties["Site ID"];
+
+
+      const filteredFeatures =
+        allSiteData.features.filter(
+          feature => {
+
+            return String(
+              feature.properties["Site ID"]
+            ) === String(siteId);
+
+          }
+        );
+
+
+      currentFilteredData = {
+        type: "FeatureCollection",
+        features: filteredFeatures
+      };
+
+
+      // Show selected site only
+      map
+        .getSource("waste-sites")
+        .setData(
+          currentFilteredData
+        );
+
+
+      // Update table
+      buildSitesTable(
+        currentFilteredData
+      );
+
+
+      // Update site count
+      updateSiteCount();
+
     }
-
-
-    const siteId =
-      event.features[0]
-        .properties["Site ID"];
-
-
-    const filteredFeatures =
-      allSiteData.features.filter(feature => {
-
-        return String(
-          feature.properties["Site ID"]
-        ) === String(siteId);
-
-      });
-
-
-    currentFilteredData = {
-      type: "FeatureCollection",
-      features: filteredFeatures
-    };
-
-
-    map
-      .getSource("waste-sites")
-      .setData(currentFilteredData);
-
-
-    buildSitesTable(
-      currentFilteredData
-    );
-
-
-    updateSiteCount();
-
-  });
+  );
 
 
   // ============================================================
   // CLICK LHN
   // ============================================================
 
-  map.on("click", "lhn-fill", event => {
+  map.on(
+    "click",
+    "lhn-fill",
+    event => {
 
-    const siteFeatures =
-      map.queryRenderedFeatures(
-        event.point,
-        {
-          layers: ["waste-sites"]
-        }
-      );
+      /*
+        Check whether a site marker was clicked.
+
+        This prevents the LHN click event from also
+        triggering when clicking a site marker.
+      */
+
+      const siteFeatures =
+        map.queryRenderedFeatures(
+          event.point,
+          {
+            layers: [
+              "waste-sites"
+            ]
+          }
+        );
 
 
-    if (siteFeatures.length) {
-      return;
+      if (siteFeatures.length) {
+        return;
+      }
+
+
+      if (!event.features.length) {
+        return;
+      }
+
+
+      const clickedLhn =
+        event.features[0]
+          .properties.lhn_code;
+
+
+      /*
+        Update the Geographical LHN dropdown.
+
+        applyFilters() then handles:
+        - markers
+        - table
+        - site count
+        - LHN fading
+      */
+
+      document
+        .getElementById(
+          "geographical-lhn-filter"
+        )
+        .value =
+          clickedLhn;
+
+
+      applyFilters();
+
     }
-
-
-    if (!event.features.length) {
-      return;
-    }
-
-
-    const clickedLhn =
-      event.features[0]
-        .properties.lhn_code;
-
-
-    document
-      .getElementById(
-        "geographical-lhn-filter"
-      )
-      .value = clickedLhn;
-
-
-    applyFilters();
-
-  });
+  );
 
 
   // ============================================================
   // POINTER - LHN
   // ============================================================
 
-  map.on("mouseenter", "lhn-fill", () => {
+  map.on(
+    "mouseenter",
+    "lhn-fill",
+    () => {
 
-    map.getCanvas().style.cursor =
-      "pointer";
+      map.getCanvas().style.cursor =
+        "pointer";
 
-  });
+    }
+  );
 
 
-  map.on("mouseleave", "lhn-fill", () => {
+  map.on(
+    "mouseleave",
+    "lhn-fill",
+    () => {
 
-    map.getCanvas().style.cursor =
-      "";
+      map.getCanvas().style.cursor =
+        "";
 
-  });
+    }
+  );
 
 
   // ============================================================
@@ -384,6 +462,10 @@ map.on("load", async () => {
     allSiteData
   );
 
+
+  // ============================================================
+  // INITIAL SITE COUNT
+  // ============================================================
 
   updateSiteCount();
 
@@ -410,47 +492,54 @@ function populateDropdown(
     ...new Set(
 
       allSiteData.features
-        .map(feature =>
-          feature.properties[propertyName]
+        .map(
+          feature =>
+            feature.properties[
+              propertyName
+            ]
         )
-        .filter(value =>
-          value !== null &&
-          value !== undefined &&
-          value !== ""
+        .filter(
+          value =>
+            value !== null &&
+            value !== undefined &&
+            value !== ""
         )
 
     )
   ];
 
 
-  values.sort((a, b) =>
-    String(a).localeCompare(
-      String(b)
-    )
+  values.sort(
+    (a, b) =>
+      String(a).localeCompare(
+        String(b)
+      )
   );
 
 
-  values.forEach(value => {
+  values.forEach(
+    value => {
 
-    const option =
-      document.createElement(
-        "option"
+      const option =
+        document.createElement(
+          "option"
+        );
+
+
+      option.value =
+        value;
+
+
+      option.textContent =
+        value;
+
+
+      select.appendChild(
+        option
       );
 
-
-    option.value =
-      value;
-
-
-    option.textContent =
-      value;
-
-
-    select.appendChild(
-      option
-    );
-
-  });
+    }
+  );
 
 }
 
@@ -489,68 +578,80 @@ function applyFilters() {
 
 
   const filteredFeatures =
-    allSiteData.features.filter(feature => {
+    allSiteData.features.filter(
+      feature => {
 
-      const properties =
-        feature.properties;
-
-
-      // Governing LHN
-      if (
-        governingLhn &&
-        properties["Governing LHN"] !==
-          governingLhn
-      ) {
-        return false;
-      }
+        const properties =
+          feature.properties;
 
 
-      // Geographical LHN
-      if (
-        geographicalLhn &&
-        properties["Geographical LHN"] !==
-          geographicalLhn
-      ) {
-        return false;
-      }
-
-
-      // Search
-      if (searchText) {
-
-        const searchableText = [
-
-          properties["Site ID"],
-          properties["Site Name"],
-          properties["Address"],
-          properties["Suburb"],
-          properties["Governing LHN"],
-          properties["Geographical LHN"],
-          properties["Notes"],
-          properties["Search Address"]
-
-        ]
-          .map(value =>
-            value ?? ""
-          )
-          .join(" ")
-          .toLowerCase();
-
+        // ========================================================
+        // GOVERNING LHN
+        // ========================================================
 
         if (
-          !searchableText.includes(
-            searchText
-          )
+          governingLhn &&
+          properties["Governing LHN"] !==
+            governingLhn
         ) {
           return false;
         }
 
+
+        // ========================================================
+        // GEOGRAPHICAL LHN
+        // ========================================================
+
+        if (
+          geographicalLhn &&
+          properties["Geographical LHN"] !==
+            geographicalLhn
+        ) {
+          return false;
+        }
+
+
+        // ========================================================
+        // SEARCH
+        // ========================================================
+
+        if (searchText) {
+
+          const searchableText = [
+
+            properties["Site ID"],
+            properties["Site Name"],
+            properties["Address"],
+            properties["Suburb"],
+            properties["Governing LHN"],
+            properties["Geographical LHN"],
+            properties["Notes"],
+            properties["Search Address"]
+
+          ]
+            .map(
+              value =>
+                value ?? ""
+            )
+            .join(" ")
+            .toLowerCase();
+
+
+          if (
+            !searchableText.includes(
+              searchText
+            )
+          ) {
+            return false;
+          }
+
+        }
+
+
+        return true;
+
       }
-
-
-      return true;
-
-    });
+    );
 
 
   currentFilteredData = {
@@ -559,7 +660,10 @@ function applyFilters() {
   };
 
 
-  // Update markers
+  // ============================================================
+  // UPDATE MAP MARKERS
+  // ============================================================
+
   map
     .getSource("waste-sites")
     .setData(
@@ -567,17 +671,26 @@ function applyFilters() {
     );
 
 
-  // Update table
+  // ============================================================
+  // UPDATE TABLE
+  // ============================================================
+
   buildSitesTable(
     currentFilteredData
   );
 
 
-  // Update counter
+  // ============================================================
+  // UPDATE SITE COUNT
+  // ============================================================
+
   updateSiteCount();
 
 
-  // Update LHN highlighting
+  // ============================================================
+  // UPDATE LHN HIGHLIGHT
+  // ============================================================
+
   updateLhnHighlight(
     geographicalLhn
   );
@@ -594,7 +707,10 @@ function updateLhnHighlight(
   lhnCode
 ) {
 
-  // No LHN selected
+  // ============================================================
+  // NOTHING SELECTED
+  // ============================================================
+
   if (!lhnCode) {
 
     map.setPaintProperty(
@@ -616,8 +732,9 @@ function updateLhnHighlight(
   }
 
 
-  // Selected LHN stays visible,
-  // all others fade.
+  // ============================================================
+  // FADE NON-SELECTED LHNs
+  // ============================================================
 
   map.setPaintProperty(
     "lhn-fill",
@@ -666,31 +783,39 @@ function updateLhnHighlight(
 
 function resetMap() {
 
+  // Clear Governing LHN
   document
     .getElementById(
       "governing-lhn-filter"
     )
-    .value = "";
+    .value =
+      "";
 
 
+  // Clear Geographical LHN
   document
     .getElementById(
       "geographical-lhn-filter"
     )
-    .value = "";
+    .value =
+      "";
 
 
+  // Clear search
   document
     .getElementById(
       "site-search"
     )
-    .value = "";
+    .value =
+      "";
 
 
+  // Restore full dataset
   currentFilteredData =
     allSiteData;
 
 
+  // Restore all markers
   map
     .getSource("waste-sites")
     .setData(
@@ -698,14 +823,17 @@ function resetMap() {
     );
 
 
+  // Restore all LHN colours
   updateLhnHighlight("");
 
 
+  // Restore full table
   buildSitesTable(
     allSiteData
   );
 
 
+  // Restore total count
   updateSiteCount();
 
 }
@@ -749,48 +877,89 @@ function exportCurrentSites() {
   }
 
 
-  const columns =
-    Object.keys(
-      currentFilteredData
-        .features[0]
-        .properties
-    );
+  // ============================================================
+  // GET ALL PROPERTY NAMES
+  // ============================================================
+
+  /*
+    This checks every currently filtered feature.
+
+    That means if a new property exists on Site 200
+    but not Site 1, it will still be included in
+    the exported CSV.
+  */
+
+  const columns = [
+    ...new Set(
+
+      currentFilteredData.features.flatMap(
+        feature =>
+          Object.keys(
+            feature.properties
+          )
+      )
+
+    )
+  ];
 
 
-  const rows = [];
+  const rows =
+    [];
 
+
+  // ============================================================
+  // CSV HEADER
+  // ============================================================
 
   rows.push(
     columns
-      .map(escapeCsvValue)
+      .map(
+        escapeCsvValue
+      )
       .join(",")
   );
 
 
+  // ============================================================
+  // CSV DATA ROWS
+  // ============================================================
+
   currentFilteredData
     .features
-    .forEach(feature => {
+    .forEach(
+      feature => {
 
-      const row =
-        columns.map(column => {
+        const row =
+          columns.map(
+            column => {
 
-          return escapeCsvValue(
-            feature.properties[column] ?? ""
+              return escapeCsvValue(
+                feature.properties[
+                  column
+                ] ?? ""
+              );
+
+            }
           );
 
-        });
 
+        rows.push(
+          row.join(",")
+        );
 
-      rows.push(
-        row.join(",")
-      );
-
-    });
+      }
+    );
 
 
   const csv =
-    rows.join("\r\n");
+    rows.join(
+      "\r\n"
+    );
 
+
+  // ============================================================
+  // CREATE DOWNLOAD
+  // ============================================================
 
   const blob =
     new Blob(
@@ -857,7 +1026,10 @@ function escapeCsvValue(
 
   return (
     '"' +
-    text.replace(/"/g, '""') +
+    text.replace(
+      /"/g,
+      '""'
+    ) +
     '"'
   );
 
@@ -916,43 +1088,68 @@ function escapeHtml(
 // BUILD SITE TABLE
 // ============================================================
 
-function buildSitesTable(siteData) {
+function buildSitesTable(
+  siteData
+) {
 
   const table =
-    document.getElementById("sites-table");
+    document.getElementById(
+      "sites-table"
+    );
 
 
-  table.innerHTML = "";
+  // Clear existing table
+  table.innerHTML =
+    "";
 
 
   // ============================================================
   // NO RESULTS
   // ============================================================
 
-  if (!siteData.features.length) {
+  if (
+    !siteData.features.length
+  ) {
 
     const tbody =
-      document.createElement("tbody");
+      document.createElement(
+        "tbody"
+      );
+
 
     const row =
-      document.createElement("tr");
+      document.createElement(
+        "tr"
+      );
+
 
     const td =
-      document.createElement("td");
+      document.createElement(
+        "td"
+      );
 
 
     td.textContent =
       "No sites found.";
 
 
-    row.appendChild(td);
+    row.appendChild(
+      td
+    );
 
-    tbody.appendChild(row);
 
-    table.appendChild(tbody);
+    tbody.appendChild(
+      row
+    );
+
+
+    table.appendChild(
+      tbody
+    );
 
 
     return;
+
   }
 
 
@@ -960,11 +1157,21 @@ function buildSitesTable(siteData) {
   // GET ALL COLUMN NAMES
   // ============================================================
 
+  /*
+    Get all property names across every feature,
+    rather than only using the first site.
+  */
+
   const columns = [
     ...new Set(
-      siteData.features.flatMap(feature =>
-        Object.keys(feature.properties)
+
+      siteData.features.flatMap(
+        feature =>
+          Object.keys(
+            feature.properties
+          )
       )
+
     )
   ];
 
@@ -981,24 +1188,33 @@ function buildSitesTable(siteData) {
   // SORT DATA
   // ============================================================
 
-  if (currentSortColumn) {
+  if (
+    currentSortColumn
+  ) {
 
-    features.sort((a, b) => {
+    features.sort(
+      (a, b) => {
 
-      const valueA =
-        a.properties[currentSortColumn] ?? "";
+        const valueA =
+          a.properties[
+            currentSortColumn
+          ] ?? "";
 
-      const valueB =
-        b.properties[currentSortColumn] ?? "";
+
+        const valueB =
+          b.properties[
+            currentSortColumn
+          ] ?? "";
 
 
-      return compareValues(
-        valueA,
-        valueB,
-        currentSortDirection
-      );
+        return compareValues(
+          valueA,
+          valueB,
+          currentSortDirection
+        );
 
-    });
+      }
+    );
 
   }
 
@@ -1008,74 +1224,93 @@ function buildSitesTable(siteData) {
   // ============================================================
 
   const thead =
-    document.createElement("thead");
+    document.createElement(
+      "thead"
+    );
 
 
   const headerRow =
-    document.createElement("tr");
+    document.createElement(
+      "tr"
+    );
 
 
-  columns.forEach(column => {
+  columns.forEach(
+    column => {
 
-    const th =
-      document.createElement("th");
-
-
-    th.textContent =
-      column;
-
-
-    // Show sort direction
-    if (
-      currentSortColumn === column
-    ) {
-
-      th.textContent +=
-        currentSortDirection === "asc"
-          ? " ▲"
-          : " ▼";
-
-    }
-
-
-    // Sort when heading is clicked
-    th.addEventListener(
-      "click",
-      () => {
-
-        if (
-          currentSortColumn === column
-        ) {
-
-          currentSortDirection =
-            currentSortDirection === "asc"
-              ? "desc"
-              : "asc";
-
-        } else {
-
-          currentSortColumn =
-            column;
-
-          currentSortDirection =
-            "asc";
-
-        }
-
-
-        buildSitesTable(
-          siteData
+      const th =
+        document.createElement(
+          "th"
         );
 
+
+      th.textContent =
+        column;
+
+
+      // ========================================================
+      // SHOW CURRENT SORT DIRECTION
+      // ========================================================
+
+      if (
+        currentSortColumn ===
+          column
+      ) {
+
+        th.textContent +=
+          currentSortDirection ===
+            "asc"
+            ? " ▲"
+            : " ▼";
+
       }
-    );
 
 
-    headerRow.appendChild(
-      th
-    );
+      // ========================================================
+      // CLICK HEADER TO SORT
+      // ========================================================
 
-  });
+      th.addEventListener(
+        "click",
+        () => {
+
+          if (
+            currentSortColumn ===
+              column
+          ) {
+
+            currentSortDirection =
+              currentSortDirection ===
+                "asc"
+                ? "desc"
+                : "asc";
+
+          } else {
+
+            currentSortColumn =
+              column;
+
+
+            currentSortDirection =
+              "asc";
+
+          }
+
+
+          buildSitesTable(
+            siteData
+          );
+
+        }
+      );
+
+
+      headerRow.appendChild(
+        th
+      );
+
+    }
+  );
 
 
   thead.appendChild(
@@ -1093,71 +1328,88 @@ function buildSitesTable(siteData) {
   // ============================================================
 
   const tbody =
-    document.createElement("tbody");
-
-
-  features.forEach(feature => {
-
-    const row =
-      document.createElement("tr");
-
-
-    // ============================================================
-    // CLICK TABLE ROW -> ZOOM TO SITE
-    // ============================================================
-
-    row.addEventListener(
-      "click",
-      () => {
-
-        if (
-          !feature.geometry ||
-          !feature.geometry.coordinates
-        ) {
-          return;
-        }
-
-
-        const coordinates =
-          feature.geometry.coordinates;
-
-
-        map.flyTo({
-          center: coordinates,
-          zoom: 15,
-          essential: true
-        });
-
-      }
+    document.createElement(
+      "tbody"
     );
 
 
-    // ============================================================
-    // CREATE CELLS
-    // ============================================================
+  features.forEach(
+    feature => {
 
-    columns.forEach(column => {
-
-      const td =
-        document.createElement("td");
-
-
-      td.textContent =
-        feature.properties[column] ?? "";
+      const row =
+        document.createElement(
+          "tr"
+        );
 
 
-      row.appendChild(
-        td
+      // ========================================================
+      // CLICK TABLE ROW -> ZOOM TO SITE
+      // ========================================================
+
+      row.addEventListener(
+        "click",
+        () => {
+
+          if (
+            !feature.geometry ||
+            !feature.geometry.coordinates
+          ) {
+            return;
+          }
+
+
+          const coordinates =
+            feature.geometry.coordinates;
+
+
+          map.flyTo({
+            center:
+              coordinates,
+
+            zoom:
+              15,
+
+            essential:
+              true
+          });
+
+        }
       );
 
-    });
+
+      // ========================================================
+      // CREATE TABLE CELLS
+      // ========================================================
+
+      columns.forEach(
+        column => {
+
+          const td =
+            document.createElement(
+              "td"
+            );
 
 
-    tbody.appendChild(
-      row
-    );
+          td.textContent =
+            feature.properties[
+              column
+            ] ?? "";
 
-  });
+
+          row.appendChild(
+            td
+          );
+
+        }
+      );
+
+
+      tbody.appendChild(
+        row
+      );
+
+    }
+  );
 
 
   table.appendChild(
@@ -1178,11 +1430,13 @@ function compareValues(
   direction
 ) {
 
-  let comparison = 0;
+  let comparison =
+    0;
 
 
   const numberA =
     Number(valueA);
+
 
   const numberB =
     Number(valueB);
@@ -1195,26 +1449,37 @@ function compareValues(
     Number.isFinite(numberB);
 
 
-  // Numeric sorting
-  if (bothNumbers) {
+  // ============================================================
+  // NUMERIC SORT
+  // ============================================================
+
+  if (
+    bothNumbers
+  ) {
 
     comparison =
-      numberA - numberB;
+      numberA -
+      numberB;
 
   }
 
-  // Text sorting
+
+  // ============================================================
+  // TEXT SORT
+  // ============================================================
+
   else {
 
     comparison =
-      String(valueA).localeCompare(
-        String(valueB),
-        undefined,
-        {
-          numeric: true,
-          sensitivity: "base"
-        }
-      );
+      String(valueA)
+        .localeCompare(
+          String(valueB),
+          undefined,
+          {
+            numeric: true,
+            sensitivity: "base"
+          }
+        );
 
   }
 
