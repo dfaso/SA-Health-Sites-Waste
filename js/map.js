@@ -138,14 +138,9 @@ map.on("load", async () => {
     "Geographical LHN"
   );
 
-  populateDropdown(
-    "suburb-filter",
-    "Suburb"
-  );
-
 
   // ============================================================
-  // DROPDOWN EVENTS
+  // FILTER EVENTS
   // ============================================================
 
   document
@@ -159,8 +154,8 @@ map.on("load", async () => {
 
 
   document
-    .getElementById("suburb-filter")
-    .addEventListener("change", applyFilters);
+    .getElementById("site-search")
+    .addEventListener("input", applyFilters);
 
 
   // ============================================================
@@ -182,6 +177,95 @@ map.on("load", async () => {
 
 
   // ============================================================
+  // MARKER HOVER POPUP
+  // ============================================================
+
+  const hoverPopup =
+    new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: false,
+      offset: 10
+    });
+
+
+  map.on("mouseenter", "waste-sites", event => {
+
+    map.getCanvas().style.cursor =
+      "pointer";
+
+
+    if (!event.features.length) {
+      return;
+    }
+
+
+    const feature =
+      event.features[0];
+
+
+    const properties =
+      feature.properties;
+
+
+    const coordinates =
+      feature.geometry.coordinates.slice();
+
+
+    const popupHtml = `
+      <div style="min-width: 220px">
+
+        <div style="
+          font-size: 14px;
+          font-weight: 700;
+          margin-bottom: 6px;
+        ">
+          ${escapeHtml(properties["Site Name"])}
+        </div>
+
+        <div style="font-size: 12px;">
+          ${escapeHtml(properties["Address"])}
+        </div>
+
+        <div style="
+          font-size: 12px;
+          margin-bottom: 6px;
+        ">
+          ${escapeHtml(properties["Suburb"])}
+        </div>
+
+        <div style="font-size: 11px;">
+          <strong>Governing LHN:</strong>
+          ${escapeHtml(properties["Governing LHN"])}
+        </div>
+
+        <div style="font-size: 11px;">
+          <strong>Geographical LHN:</strong>
+          ${escapeHtml(properties["Geographical LHN"])}
+        </div>
+
+      </div>
+    `;
+
+
+    hoverPopup
+      .setLngLat(coordinates)
+      .setHTML(popupHtml)
+      .addTo(map);
+
+  });
+
+
+  map.on("mouseleave", "waste-sites", () => {
+
+    map.getCanvas().style.cursor =
+      "";
+
+    hoverPopup.remove();
+
+  });
+
+
+  // ============================================================
   // CLICK SITE
   // ============================================================
 
@@ -193,7 +277,8 @@ map.on("load", async () => {
 
 
     const siteId =
-      event.features[0].properties["Site ID"];
+      event.features[0]
+        .properties["Site ID"];
 
 
     const filteredFeatures =
@@ -212,13 +297,15 @@ map.on("load", async () => {
     };
 
 
-    // Show only selected site on map
     map
       .getSource("waste-sites")
       .setData(currentFilteredData);
 
 
-    buildSitesTable(currentFilteredData);
+    buildSitesTable(
+      currentFilteredData
+    );
+
 
     updateSiteCount();
 
@@ -230,11 +317,6 @@ map.on("load", async () => {
   // ============================================================
 
   map.on("click", "lhn-fill", event => {
-
-    /*
-      Ignore the LHN click if the user actually clicked
-      one of the site markers.
-    */
 
     const siteFeatures =
       map.queryRenderedFeatures(
@@ -256,43 +338,18 @@ map.on("load", async () => {
 
 
     const clickedLhn =
-      event.features[0].properties.lhn_code;
+      event.features[0]
+        .properties.lhn_code;
 
-
-    /*
-      Put the selected LHN into the geographical
-      dropdown.
-
-      Then use the same filtering function as the
-      dropdown controls.
-    */
 
     document
-      .getElementById("geographical-lhn-filter")
+      .getElementById(
+        "geographical-lhn-filter"
+      )
       .value = clickedLhn;
 
 
     applyFilters();
-
-  });
-
-
-  // ============================================================
-  // POINTER - SITES
-  // ============================================================
-
-  map.on("mouseenter", "waste-sites", () => {
-
-    map.getCanvas().style.cursor =
-      "pointer";
-
-  });
-
-
-  map.on("mouseleave", "waste-sites", () => {
-
-    map.getCanvas().style.cursor =
-      "";
 
   });
 
@@ -321,7 +378,10 @@ map.on("load", async () => {
   // INITIAL TABLE
   // ============================================================
 
-  buildSitesTable(allSiteData);
+  buildSitesTable(
+    allSiteData
+  );
+
 
   updateSiteCount();
 
@@ -339,7 +399,9 @@ function populateDropdown(
 ) {
 
   const select =
-    document.getElementById(elementId);
+    document.getElementById(
+      elementId
+    );
 
 
   const values = [
@@ -360,20 +422,31 @@ function populateDropdown(
 
 
   values.sort((a, b) =>
-    String(a).localeCompare(String(b))
+    String(a).localeCompare(
+      String(b)
+    )
   );
 
 
   values.forEach(value => {
 
     const option =
-      document.createElement("option");
+      document.createElement(
+        "option"
+      );
 
-    option.value = value;
 
-    option.textContent = value;
+    option.value =
+      value;
 
-    select.appendChild(option);
+
+    option.textContent =
+      value;
+
+
+    select.appendChild(
+      option
+    );
 
   });
 
@@ -382,27 +455,35 @@ function populateDropdown(
 
 
 // ============================================================
-// APPLY DROPDOWN FILTERS
+// APPLY FILTERS
 // ============================================================
 
 function applyFilters() {
 
   const governingLhn =
     document
-      .getElementById("governing-lhn-filter")
+      .getElementById(
+        "governing-lhn-filter"
+      )
       .value;
 
 
   const geographicalLhn =
     document
-      .getElementById("geographical-lhn-filter")
+      .getElementById(
+        "geographical-lhn-filter"
+      )
       .value;
 
 
-  const suburb =
+  const searchText =
     document
-      .getElementById("suburb-filter")
-      .value;
+      .getElementById(
+        "site-search"
+      )
+      .value
+      .trim()
+      .toLowerCase();
 
 
   const filteredFeatures =
@@ -412,27 +493,56 @@ function applyFilters() {
         feature.properties;
 
 
+      // Governing LHN
       if (
         governingLhn &&
-        properties["Governing LHN"] !== governingLhn
+        properties["Governing LHN"] !==
+          governingLhn
       ) {
         return false;
       }
 
 
+      // Geographical LHN
       if (
         geographicalLhn &&
-        properties["Geographical LHN"] !== geographicalLhn
+        properties["Geographical LHN"] !==
+          geographicalLhn
       ) {
         return false;
       }
 
 
-      if (
-        suburb &&
-        properties["Suburb"] !== suburb
-      ) {
-        return false;
+      // Search
+      if (searchText) {
+
+        const searchableText = [
+
+          properties["Site ID"],
+          properties["Site Name"],
+          properties["Address"],
+          properties["Suburb"],
+          properties["Governing LHN"],
+          properties["Geographical LHN"],
+          properties["Notes"],
+          properties["Search Address"]
+
+        ]
+          .map(value =>
+            value ?? ""
+          )
+          .join(" ")
+          .toLowerCase();
+
+
+        if (
+          !searchableText.includes(
+            searchText
+          )
+        ) {
+          return false;
+        }
+
       }
 
 
@@ -447,22 +557,28 @@ function applyFilters() {
   };
 
 
-  // Update map markers
+  // Update markers
   map
     .getSource("waste-sites")
-    .setData(currentFilteredData);
+    .setData(
+      currentFilteredData
+    );
 
 
   // Update table
-  buildSitesTable(currentFilteredData);
+  buildSitesTable(
+    currentFilteredData
+  );
 
 
   // Update counter
   updateSiteCount();
 
 
-  // Highlight geographical LHN
-  updateLhnHighlight(geographicalLhn);
+  // Update LHN highlighting
+  updateLhnHighlight(
+    geographicalLhn
+  );
 
 }
 
@@ -472,10 +588,11 @@ function applyFilters() {
 // LHN HIGHLIGHT
 // ============================================================
 
-function updateLhnHighlight(lhnCode) {
+function updateLhnHighlight(
+  lhnCode
+) {
 
-  // Nothing selected - restore normal appearance
-
+  // No LHN selected
   if (!lhnCode) {
 
     map.setPaintProperty(
@@ -497,7 +614,8 @@ function updateLhnHighlight(lhnCode) {
   }
 
 
-  // Fade everything except selected LHN
+  // Selected LHN stays visible,
+  // all others fade.
 
   map.setPaintProperty(
     "lhn-fill",
@@ -505,7 +623,11 @@ function updateLhnHighlight(lhnCode) {
     [
       "case",
 
-      ["==", ["get", "lhn_code"], lhnCode],
+      [
+        "==",
+        ["get", "lhn_code"],
+        lhnCode
+      ],
 
       0.35,
 
@@ -520,7 +642,11 @@ function updateLhnHighlight(lhnCode) {
     [
       "case",
 
-      ["==", ["get", "lhn_code"], lhnCode],
+      [
+        "==",
+        ["get", "lhn_code"],
+        lhnCode
+      ],
 
       1,
 
@@ -539,17 +665,23 @@ function updateLhnHighlight(lhnCode) {
 function resetMap() {
 
   document
-    .getElementById("governing-lhn-filter")
+    .getElementById(
+      "governing-lhn-filter"
+    )
     .value = "";
 
 
   document
-    .getElementById("geographical-lhn-filter")
+    .getElementById(
+      "geographical-lhn-filter"
+    )
     .value = "";
 
 
   document
-    .getElementById("suburb-filter")
+    .getElementById(
+      "site-search"
+    )
     .value = "";
 
 
@@ -559,13 +691,17 @@ function resetMap() {
 
   map
     .getSource("waste-sites")
-    .setData(allSiteData);
+    .setData(
+      allSiteData
+    );
 
 
   updateLhnHighlight("");
 
 
-  buildSitesTable(allSiteData);
+  buildSitesTable(
+    allSiteData
+  );
 
 
   updateSiteCount();
@@ -581,11 +717,15 @@ function resetMap() {
 function updateSiteCount() {
 
   const count =
-    currentFilteredData.features.length;
+    currentFilteredData
+      .features
+      .length;
 
 
   document
-    .getElementById("site-count")
+    .getElementById(
+      "site-count"
+    )
     .textContent =
       count.toLocaleString();
 
@@ -618,7 +758,6 @@ function exportCurrentSites() {
   const rows = [];
 
 
-  // CSV header
   rows.push(
     columns
       .map(escapeCsvValue)
@@ -626,7 +765,6 @@ function exportCurrentSites() {
   );
 
 
-  // CSV rows
   currentFilteredData
     .features
     .forEach(feature => {
@@ -663,26 +801,41 @@ function exportCurrentSites() {
 
 
   const url =
-    URL.createObjectURL(blob);
+    URL.createObjectURL(
+      blob
+    );
 
 
   const link =
-    document.createElement("a");
+    document.createElement(
+      "a"
+    );
 
 
-  link.href = url;
+  link.href =
+    url;
+
 
   link.download =
     "waste_sites_export.csv";
 
 
-  document.body.appendChild(link);
+  document.body.appendChild(
+    link
+  );
+
 
   link.click();
 
-  document.body.removeChild(link);
 
-  URL.revokeObjectURL(url);
+  document.body.removeChild(
+    link
+  );
+
+
+  URL.revokeObjectURL(
+    url
+  );
 
 }
 
@@ -692,7 +845,9 @@ function exportCurrentSites() {
 // CSV ESCAPING
 // ============================================================
 
-function escapeCsvValue(value) {
+function escapeCsvValue(
+  value
+) {
 
   const text =
     String(value);
@@ -709,43 +864,113 @@ function escapeCsvValue(value) {
 
 
 // ============================================================
+// HTML ESCAPING
+// ============================================================
+
+function escapeHtml(
+  value
+) {
+
+  if (
+    value === null ||
+    value === undefined
+  ) {
+    return "";
+  }
+
+
+  return String(value)
+
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
+
+}
+
+
+
+// ============================================================
 // BUILD SITE TABLE
 // ============================================================
 
-function buildSitesTable(siteData) {
+function buildSitesTable(
+  siteData
+) {
 
   const table =
-    document.getElementById("sites-table");
+    document.getElementById(
+      "sites-table"
+    );
 
 
-  table.innerHTML = "";
+  table.innerHTML =
+    "";
 
 
   // ============================================================
   // NO RESULTS
   // ============================================================
 
-  if (!siteData.features.length) {
+  if (
+    !siteData.features.length
+  ) {
 
     const tbody =
-      document.createElement("tbody");
+      document.createElement(
+        "tbody"
+      );
+
 
     const row =
-      document.createElement("tr");
+      document.createElement(
+        "tr"
+      );
+
 
     const td =
-      document.createElement("td");
+      document.createElement(
+        "td"
+      );
 
 
     td.textContent =
       "No sites found.";
 
 
-    row.appendChild(td);
+    row.appendChild(
+      td
+    );
 
-    tbody.appendChild(row);
 
-    table.appendChild(tbody);
+    tbody.appendChild(
+      row
+    );
+
+
+    table.appendChild(
+      tbody
+    );
 
 
     return;
@@ -755,7 +980,9 @@ function buildSitesTable(siteData) {
 
   const columns =
     Object.keys(
-      siteData.features[0].properties
+      siteData
+        .features[0]
+        .properties
     );
 
 
@@ -764,31 +991,44 @@ function buildSitesTable(siteData) {
   // ============================================================
 
   const thead =
-    document.createElement("thead");
+    document.createElement(
+      "thead"
+    );
 
 
   const headerRow =
-    document.createElement("tr");
+    document.createElement(
+      "tr"
+    );
 
 
   columns.forEach(column => {
 
     const th =
-      document.createElement("th");
+      document.createElement(
+        "th"
+      );
 
 
     th.textContent =
       column;
 
 
-    headerRow.appendChild(th);
+    headerRow.appendChild(
+      th
+    );
 
   });
 
 
-  thead.appendChild(headerRow);
+  thead.appendChild(
+    headerRow
+  );
 
-  table.appendChild(thead);
+
+  table.appendChild(
+    thead
+  );
 
 
   // ============================================================
@@ -796,35 +1036,53 @@ function buildSitesTable(siteData) {
   // ============================================================
 
   const tbody =
-    document.createElement("tbody");
+    document.createElement(
+      "tbody"
+    );
 
 
-  siteData.features.forEach(feature => {
+  siteData.features.forEach(
+    feature => {
 
-    const row =
-      document.createElement("tr");
-
-
-    columns.forEach(column => {
-
-      const td =
-        document.createElement("td");
+      const row =
+        document.createElement(
+          "tr"
+        );
 
 
-      td.textContent =
-        feature.properties[column] ?? "";
+      columns.forEach(
+        column => {
+
+          const td =
+            document.createElement(
+              "td"
+            );
 
 
-      row.appendChild(td);
-
-    });
-
-
-    tbody.appendChild(row);
-
-  });
+          td.textContent =
+            feature
+              .properties[column] ??
+            "";
 
 
-  table.appendChild(tbody);
+          row.appendChild(
+            td
+          );
+
+        }
+      );
+
+
+      tbody.appendChild(
+        row
+      );
+
+    }
+  );
+
+
+  table.appendChild(
+    tbody
+  );
 
 }
