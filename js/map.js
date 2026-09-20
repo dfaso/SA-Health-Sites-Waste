@@ -5,8 +5,6 @@ const map = new maplibregl.Map({
   zoom: 5
 });
 
--31.519179230054693, 135.55638863046636
-
 map.addControl(
   new maplibregl.NavigationControl(),
   "top-left"
