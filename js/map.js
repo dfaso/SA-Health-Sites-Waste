@@ -81,7 +81,6 @@ map.on("load", async () => {
   // ============================================================
 
   const response = await fetch("./data/waste_sites.geojson");
-
   const siteData = await response.json();
 
 
@@ -201,7 +200,94 @@ map.on("load", async () => {
 
 
   // ============================================================
-  // CLUSTER POINTER
+  // CLICK INDIVIDUAL SITE
+  // ============================================================
+
+  map.on("click", "waste-sites", (event) => {
+
+    if (!event.features.length) {
+      return;
+    }
+
+    const clickedSite = event.features[0];
+
+    const siteId =
+      clickedSite.properties["Site ID"];
+
+    const filteredFeatures =
+      siteData.features.filter(feature => {
+
+        return String(feature.properties["Site ID"]) ===
+               String(siteId);
+
+      });
+
+
+    buildSitesTable({
+      type: "FeatureCollection",
+      features: filteredFeatures
+    });
+
+  }); // END individual site click
+
+
+  // ============================================================
+  // CLICK LHN
+  // ============================================================
+
+  map.on("click", "lhn-fill", (event) => {
+
+    /*
+      A site marker or cluster may also be sitting over the LHN polygon.
+
+      If one was clicked, let the site/cluster event handle the click
+      instead of also filtering by LHN.
+    */
+
+    const siteFeatures = map.queryRenderedFeatures(
+      event.point,
+      {
+        layers: [
+          "waste-sites",
+          "clusters",
+          "cluster-count"
+        ]
+      }
+    );
+
+    if (siteFeatures.length) {
+      return;
+    }
+
+
+    if (!event.features.length) {
+      return;
+    }
+
+
+    const clickedLhn =
+      event.features[0].properties.lhn_code;
+
+
+    const filteredFeatures =
+      siteData.features.filter(feature => {
+
+        return feature.properties["Geographical LHN"] ===
+               clickedLhn;
+
+      });
+
+
+    buildSitesTable({
+      type: "FeatureCollection",
+      features: filteredFeatures
+    });
+
+  }); // END LHN click
+
+
+  // ============================================================
+  // POINTER - CLUSTERS
   // ============================================================
 
   map.on("mouseenter", "clusters", () => {
@@ -214,7 +300,33 @@ map.on("load", async () => {
 
 
   // ============================================================
-  // BUILD SITE TABLE
+  // POINTER - INDIVIDUAL SITES
+  // ============================================================
+
+  map.on("mouseenter", "waste-sites", () => {
+    map.getCanvas().style.cursor = "pointer";
+  });
+
+  map.on("mouseleave", "waste-sites", () => {
+    map.getCanvas().style.cursor = "";
+  });
+
+
+  // ============================================================
+  // POINTER - LHN
+  // ============================================================
+
+  map.on("mouseenter", "lhn-fill", () => {
+    map.getCanvas().style.cursor = "pointer";
+  });
+
+  map.on("mouseleave", "lhn-fill", () => {
+    map.getCanvas().style.cursor = "";
+  });
+
+
+  // ============================================================
+  // BUILD INITIAL TABLE
   // ============================================================
 
   buildSitesTable(siteData);
@@ -229,14 +341,39 @@ map.on("load", async () => {
 
 function buildSitesTable(siteData) {
 
-  const table = document.getElementById("sites-table");
+  const table =
+    document.getElementById("sites-table");
+
+
+  // Clear existing table first.
+  // This is important now that we're filtering/rebuilding it.
+
+  table.innerHTML = "";
+
 
   if (!siteData.features.length) {
+
+    const tbody =
+      document.createElement("tbody");
+
+    const row =
+      document.createElement("tr");
+
+    const td =
+      document.createElement("td");
+
+    td.textContent = "No sites found.";
+
+    row.appendChild(td);
+    tbody.appendChild(row);
+    table.appendChild(tbody);
+
     return;
   }
 
 
-  // Get property names from first GeoJSON feature
+  // Get property names from the first GeoJSON feature
+
   const columns = Object.keys(
     siteData.features[0].properties
   );
@@ -246,14 +383,17 @@ function buildSitesTable(siteData) {
   // TABLE HEADER
   // ============================================================
 
-  const thead = document.createElement("thead");
+  const thead =
+    document.createElement("thead");
 
-  const headerRow = document.createElement("tr");
+  const headerRow =
+    document.createElement("tr");
 
 
   columns.forEach(column => {
 
-    const th = document.createElement("th");
+    const th =
+      document.createElement("th");
 
     th.textContent = column;
 
@@ -263,7 +403,6 @@ function buildSitesTable(siteData) {
 
 
   thead.appendChild(headerRow);
-
   table.appendChild(thead);
 
 
@@ -271,17 +410,20 @@ function buildSitesTable(siteData) {
   // TABLE BODY
   // ============================================================
 
-  const tbody = document.createElement("tbody");
+  const tbody =
+    document.createElement("tbody");
 
 
   siteData.features.forEach(feature => {
 
-    const row = document.createElement("tr");
+    const row =
+      document.createElement("tr");
 
 
     columns.forEach(column => {
 
-      const td = document.createElement("td");
+      const td =
+        document.createElement("td");
 
       td.textContent =
         feature.properties[column] ?? "";
