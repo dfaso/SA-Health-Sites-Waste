@@ -48,6 +48,7 @@
 
         <!-- Site Count -->
         <div class="col-12 col-md-auto me-md-auto">
+
           <div class="small text-white-50">
             Sites shown
           </div>
@@ -57,11 +58,12 @@
             class="fs-4 fw-semibold">
             0
           </div>
+
         </div>
 
 
         <!-- Governing LHN -->
-        <div class="col-12 col-md-4 col-xl-2">
+        <div class="col-12 col-md-3">
 
           <label
             for="governing-lhn-filter"
@@ -83,7 +85,7 @@
 
 
         <!-- Geographical LHN -->
-        <div class="col-12 col-md-4 col-xl-2">
+        <div class="col-12 col-md-3">
 
           <label
             for="geographical-lhn-filter"
@@ -104,24 +106,21 @@
         </div>
 
 
-        <!-- Suburb -->
-        <div class="col-12 col-md-4 col-xl-2">
+        <!-- Search -->
+        <div class="col-12 col-md-3">
 
           <label
-            for="suburb-filter"
+            for="site-search"
             class="form-label small mb-1">
-            Suburb
+            Search
           </label>
 
-          <select
-            id="suburb-filter"
-            class="form-select form-select-sm">
-
-            <option value="">
-              All
-            </option>
-
-          </select>
+          <input
+            id="site-search"
+            type="search"
+            class="form-control form-control-sm"
+            placeholder="Site, suburb, address..."
+          >
 
         </div>
 
