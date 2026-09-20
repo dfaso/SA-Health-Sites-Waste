@@ -71,27 +71,91 @@ map.addLayer({
   const siteData = await response.json();
 
 
-  // ============================================================
-  // WASTE SITE MAP POINTS
-  // ============================================================
+// ============================================================
+// WASTE SITE MAP POINTS + CLUSTERING
+// ============================================================
 
-  map.addSource("waste-sites", {
-    type: "geojson",
-    data: siteData
-  });
+map.addSource("waste-sites", {
+  type: "geojson",
+  data: siteData,
 
-  map.addLayer({
-    id: "waste-sites",
-    type: "circle",
-    source: "waste-sites",
+  cluster: true,
+  clusterMaxZoom: 14,
+  clusterRadius: 50
+});
 
-    paint: {
-      "circle-radius": 6,
-      "circle-color": "#FF4A4A",
-      "circle-stroke-color": "#ffffff",
-      "circle-stroke-width": 1
-    }
-  });
+
+// ============================================================
+// CLUSTER CIRCLES
+// ============================================================
+
+map.addLayer({
+  id: "clusters",
+  type: "circle",
+  source: "waste-sites",
+
+  filter: ["has", "point_count"],
+
+  paint: {
+    "circle-color": "#0d6efd",
+
+    "circle-radius": [
+      "step",
+      ["get", "point_count"],
+
+      20,       // default size
+
+      10, 25,   // 10+ sites
+      50, 30,   // 50+ sites
+      100, 35   // 100+ sites
+    ],
+
+    "circle-stroke-color": "#ffffff",
+    "circle-stroke-width": 2
+  }
+});
+
+
+// ============================================================
+// CLUSTER COUNT
+// ============================================================
+
+map.addLayer({
+  id: "cluster-count",
+  type: "symbol",
+  source: "waste-sites",
+
+  filter: ["has", "point_count"],
+
+  layout: {
+    "text-field": ["get", "point_count_abbreviated"],
+    "text-size": 14
+  },
+
+  paint: {
+    "text-color": "#ffffff"
+  }
+});
+
+
+// ============================================================
+// INDIVIDUAL SITE POINTS
+// ============================================================
+
+map.addLayer({
+  id: "waste-sites",
+  type: "circle",
+  source: "waste-sites",
+
+  filter: ["!", ["has", "point_count"]],
+
+  paint: {
+    "circle-radius": 6,
+    "circle-color": "#FF4A4A",
+    "circle-stroke-color": "#ffffff",
+    "circle-stroke-width": 1
+  }
+});
 
 
   // ============================================================
@@ -100,6 +164,29 @@ map.addLayer({
 
   buildSitesTable(siteData);
 
+// ============================================================
+// CLICK CLUSTER TO ZOOM IN
+// ============================================================
+
+map.on("click", "clusters", async (event) => {
+
+  const features = map.queryRenderedFeatures(event.point, {
+    layers: ["clusters"]
+  });
+
+  const clusterId = features[0].properties.cluster_id;
+
+  const zoom = await map
+    .getSource("waste-sites")
+    .getClusterExpansionZoom(clusterId);
+
+  map.easeTo({
+    center: features[0].geometry.coordinates,
+    zoom: zoom
+  });
+
+});
+  
 });
 
 
