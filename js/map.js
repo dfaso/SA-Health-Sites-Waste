@@ -81,86 +81,28 @@ map.on("load", async () => {
   // ============================================================
 
   const response = await fetch("./data/waste_sites.geojson");
+
   const siteData = await response.json();
 
 
   // ============================================================
-  // WASTE SITE SOURCE + CLUSTERING
+  // WASTE SITE SOURCE
   // ============================================================
 
   map.addSource("waste-sites", {
     type: "geojson",
-    data: siteData,
-
-    cluster: true,
-    clusterMaxZoom: 14,
-    clusterRadius: 50
+    data: siteData
   });
 
 
   // ============================================================
-  // CLUSTER CIRCLES
-  // ============================================================
-
-  map.addLayer({
-    id: "clusters",
-    type: "circle",
-    source: "waste-sites",
-
-    filter: ["has", "point_count"],
-
-    paint: {
-      "circle-color": "#0d6efd",
-
-      "circle-radius": [
-        "step",
-        ["get", "point_count"],
-
-        20,
-
-        10, 25,
-        50, 30,
-        100, 35
-      ],
-
-      "circle-stroke-color": "#ffffff",
-      "circle-stroke-width": 2
-    }
-  });
-
-
-  // ============================================================
-  // CLUSTER COUNT
-  // ============================================================
-
-  map.addLayer({
-    id: "cluster-count",
-    type: "symbol",
-    source: "waste-sites",
-
-    filter: ["has", "point_count"],
-
-    layout: {
-      "text-field": ["get", "point_count_abbreviated"],
-      "text-size": 14
-    },
-
-    paint: {
-      "text-color": "#ffffff"
-    }
-  });
-
-
-  // ============================================================
-  // INDIVIDUAL SITE POINTS
+  // WASTE SITE POINTS
   // ============================================================
 
   map.addLayer({
     id: "waste-sites",
     type: "circle",
     source: "waste-sites",
-
-    filter: ["!", ["has", "point_count"]],
 
     paint: {
       "circle-radius": 6,
@@ -169,34 +111,6 @@ map.on("load", async () => {
       "circle-stroke-width": 1
     }
   });
-
-
-  // ============================================================
-  // CLICK CLUSTER TO ZOOM IN
-  // ============================================================
-
-  map.on("click", "clusters", async (event) => {
-
-    const features = map.queryRenderedFeatures(event.point, {
-      layers: ["clusters"]
-    });
-
-    if (!features.length) {
-      return;
-    }
-
-    const clusterId = features[0].properties.cluster_id;
-
-    const zoom = await map
-      .getSource("waste-sites")
-      .getClusterExpansionZoom(clusterId);
-
-    map.easeTo({
-      center: features[0].geometry.coordinates,
-      zoom: zoom
-    });
-
-  }); // END cluster click
 
 
   // ============================================================
@@ -214,6 +128,7 @@ map.on("load", async () => {
     const siteId =
       clickedSite.properties["Site ID"];
 
+
     const filteredFeatures =
       siteData.features.filter(feature => {
 
@@ -223,126 +138,120 @@ map.on("load", async () => {
       });
 
 
-    buildSitesTable({
+    const filteredSiteData = {
       type: "FeatureCollection",
       features: filteredFeatures
-    });
+    };
 
-  }); // END individual site click
+
+    // Filter the table to this site
+    buildSitesTable(filteredSiteData);
+
+  }); // END site click
 
 
   // ============================================================
-// CLICK LHN
-// ============================================================
+  // CLICK LHN
+  // ============================================================
 
-map.on("click", "lhn-fill", (event) => {
+  map.on("click", "lhn-fill", (event) => {
 
-  // Don't trigger the LHN click if a site or cluster was clicked
-  const siteFeatures = map.queryRenderedFeatures(
-    event.point,
-    {
-      layers: [
-        "waste-sites",
-        "clusters",
-        "cluster-count"
-      ]
+    /*
+      Check whether a site marker was clicked.
+
+      The site markers sit above the LHN polygons, so this prevents
+      the LHN click event from also firing when clicking a site.
+    */
+
+    const siteFeatures = map.queryRenderedFeatures(
+      event.point,
+      {
+        layers: ["waste-sites"]
+      }
+    );
+
+
+    if (siteFeatures.length) {
+      return;
     }
-  );
-
-  if (siteFeatures.length) {
-    return;
-  }
 
 
-  if (!event.features.length) {
-    return;
-  }
+    if (!event.features.length) {
+      return;
+    }
 
 
-  // Get selected LHN code
-  const clickedLhn =
-    event.features[0].properties.lhn_code;
+    // Get selected LHN code
+    const clickedLhn =
+      event.features[0].properties.lhn_code;
 
 
-  // ============================================================
-  // FILTER SITES TO SELECTED LHN
-  // ============================================================
+    // ============================================================
+    // FILTER SITES TO SELECTED LHN
+    // ============================================================
 
-  const filteredFeatures =
-    siteData.features.filter(feature => {
+    const filteredFeatures =
+      siteData.features.filter(feature => {
 
-      return feature.properties["Geographical LHN"] ===
-             clickedLhn;
+        return feature.properties["Geographical LHN"] ===
+               clickedLhn;
 
-    });
-
-
-  const filteredSiteData = {
-    type: "FeatureCollection",
-    features: filteredFeatures
-  };
+      });
 
 
-  // Update map markers / clusters
-  map
-    .getSource("waste-sites")
-    .setData(filteredSiteData);
+    const filteredSiteData = {
+      type: "FeatureCollection",
+      features: filteredFeatures
+    };
 
 
-  // Update table
-  buildSitesTable(filteredSiteData);
+    // Remove all non-selected sites from the map
+    map
+      .getSource("waste-sites")
+      .setData(filteredSiteData);
 
 
-  // ============================================================
-  // FADE NON-SELECTED LHNs
-  // ============================================================
-
-  map.setPaintProperty(
-    "lhn-fill",
-    "fill-opacity",
-    [
-      "case",
-
-      ["==", ["get", "lhn_code"], clickedLhn],
-      0.35,
-
-      0.05
-    ]
-  );
+    // Filter the table
+    buildSitesTable(filteredSiteData);
 
 
-  // Fade non-selected outlines as well
-  map.setPaintProperty(
-    "lhn-outline",
-    "line-opacity",
-    [
-      "case",
+    // ============================================================
+    // FADE NON-SELECTED LHNs
+    // ============================================================
 
-      ["==", ["get", "lhn_code"], clickedLhn],
-      1,
+    map.setPaintProperty(
+      "lhn-fill",
+      "fill-opacity",
+      [
+        "case",
 
-      0.15
-    ]
-  );
+        ["==", ["get", "lhn_code"], clickedLhn],
+        0.35,
 
-}); // END LHN click
+        0.05
+      ]
+    );
+
+
+    // Fade non-selected outlines
+    map.setPaintProperty(
+      "lhn-outline",
+      "line-opacity",
+      [
+        "case",
+
+        ["==", ["get", "lhn_code"], clickedLhn],
+        1,
+
+        0.15
+      ]
+    );
+
+  }); // END LHN click
 
 
   // ============================================================
-  // POINTER - CLUSTERS
-  // ============================================================
-
-  map.on("mouseenter", "clusters", () => {
-    map.getCanvas().style.cursor = "pointer";
-  });
-
-  map.on("mouseleave", "clusters", () => {
-    map.getCanvas().style.cursor = "";
-  });
-
-
-  // ============================================================
-  // POINTER - INDIVIDUAL SITES
+  // POINTER - SITES
   // ============================================================
 
   map.on("mouseenter", "waste-sites", () => {
@@ -387,11 +296,13 @@ function buildSitesTable(siteData) {
     document.getElementById("sites-table");
 
 
-  // Clear existing table first.
-  // This is important now that we're filtering/rebuilding it.
-
+  // Clear the current table before rebuilding it
   table.innerHTML = "";
 
+
+  // ============================================================
+  // NO RESULTS
+  // ============================================================
 
   if (!siteData.features.length) {
 
@@ -414,8 +325,7 @@ function buildSitesTable(siteData) {
   }
 
 
-  // Get property names from the first GeoJSON feature
-
+  // Get the property names from the first site
   const columns = Object.keys(
     siteData.features[0].properties
   );
@@ -445,6 +355,7 @@ function buildSitesTable(siteData) {
 
 
   thead.appendChild(headerRow);
+
   table.appendChild(thead);
 
 
