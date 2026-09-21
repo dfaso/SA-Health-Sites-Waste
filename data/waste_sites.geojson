@@ -491,7 +491,7 @@
       "properties": {
         "Site ID": 23,
         "Governing LHN": "CALHN",
-        "Geographical LHN": "CALHN",
+        "Geographical LHN": "NALHN",
         "Site Name": "Hampstead Dialysis Centre",
         "Address": "237 Hampstead Road",
         "Suburb": "LIGHTSVIEW",
@@ -1195,7 +1195,7 @@
       "properties": {
         "Site ID": 55,
         "Governing LHN": "CALHN",
-        "Geographical LHN": "CALHN",
+        "Geographical LHN": "NALHN",
         "Site Name": "SA Dental - Northfield Adelaide Women's Prison",
         "Address": "Grand Junction Road",
         "Suburb": "NORTHFIELD",
@@ -1283,7 +1283,7 @@
       "properties": {
         "Site ID": 59,
         "Governing LHN": "CALHN",
-        "Geographical LHN": "CALHN",
+        "Geographical LHN": "NALHN",
         "Site Name": "SA Dental - Yatala Prison",
         "Address": "1 Peter Brown Drive",
         "Suburb": "NORTHFIELD",
@@ -1921,7 +1921,7 @@
       "properties": {
         "Site ID": 88,
         "Governing LHN": "CALHN",
-        "Geographical LHN": "CALHN",
+        "Geographical LHN": "NALHN",
         "Site Name": "SA Pharmacy - Hampstead Rehabilitation Centre (HRC)",
         "Address": "207-235 Hampstead Road",
         "Suburb": "NORTHFIELD",
@@ -2251,7 +2251,7 @@
       "properties": {
         "Site ID": 103,
         "Governing LHN": "CALHN",
-        "Geographical LHN": "CALHN",
+        "Geographical LHN": "NALHN",
         "Site Name": "Prison Health - Yatala Prison Health Centre",
         "Address": "1 Peter Brown Drive",
         "Suburb": "NORTHFIELD",
