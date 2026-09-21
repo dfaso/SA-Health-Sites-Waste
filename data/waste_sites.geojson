@@ -1569,7 +1569,7 @@
       "properties": {
         "Site ID": 72,
         "Governing LHN": "CALHN",
-        "Geographical LHN": "NALHN",
+        "Geographical LHN": "CALHN",
         "Site Name": "SA Dental - Parks",
         "Address": "2/40-44 Trafford Street",
         "Suburb": "ANGLE PARK",
@@ -5419,7 +5419,7 @@
       "properties": {
         "Site ID": 249,
         "Governing LHN": "NALHN",
-        "Geographical LHN": "NALHN",
+        "Geographical LHN": "CALHN",
         "Site Name": "Kanggawodli",
         "Address": "16-22 Clements Street",
         "Suburb": "DUDLEY PARK",
@@ -8587,7 +8587,7 @@
       "properties": {
         "Site ID": 394,
         "Governing LHN": "WCHN",
-        "Geographical LHN": "NALHN",
+        "Geographical LHN": "CALHN",
         "Site Name": "CAFHS - Angle Park Children’s Centre",
         "Address": "50 Trafford Street",
         "Suburb": "ANGLE PARK",
@@ -8741,7 +8741,7 @@
       "properties": {
         "Site ID": 401,
         "Governing LHN": "WCHN",
-        "Geographical LHN": "NALHN",
+        "Geographical LHN": "CALHN",
         "Site Name": "Metropolitan Youth Heath - Angle Park",
         "Address": "Unit 1 40-44 Trafford Street",
         "Suburb": "ANGLE PARK",
