@@ -2163,7 +2163,7 @@
       "properties": {
         "Site ID": 99,
         "Governing LHN": "CALHN",
-        "Geographical LHN": "CALHN",
+        "Geographical LHN": "WCHN",
         "Site Name": "SA Pathology - Women's and Children’s Hospital",
         "Address": "72 King William Road",
         "Suburb": "NORTH ADELAIDE",
@@ -9137,7 +9137,7 @@
       "properties": {
         "Site ID": 419,
         "Governing LHN": "WCHN",
-        "Geographical LHN": "CALHN",
+        "Geographical LHN": "WCHN",
         "Site Name": "Women’s and Children’s Hospital",
         "Address": "72 King William Road",
         "Suburb": "NORTH ADELAIDE",
