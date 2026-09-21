@@ -3747,7 +3747,7 @@
       "properties": {
         "Site ID": 173,
         "Governing LHN": "SAAS",
-        "Geographical LHN": "RMCLHN",
+        "Geographical LHN": "YNLHN",
         "Site Name": "SA Ambulance - Lucindale",
         "Address": "1 Musgrave Avenue",
         "Suburb": "LUCINDALE",
@@ -6034,8 +6034,8 @@
       "type": "Feature",
       "properties": {
         "Site ID": 277,
-        "Governing LHN": "RMCLHN",
-        "Geographical LHN": "RMCLHN",
+        "Governing LHN": "YNLHN",
+        "Geographical LHN": "YNLHN",
         "Site Name": "Riverton District Soldiers’ Memorial Hospital",
         "Address": "23 Moorhouse Terrace",
         "Suburb": "RIVERTON",
